@@ -1,0 +1,77 @@
+service: owntracks
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: prod
+  region: eu-central-1
+
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "sqs:SendMessage"
+            - "sqs:ReceiveMessage"
+          Resource:
+            Fn::GetAtt: [ SQSLocation, Arn ]
+        - Effect: "Allow"
+          Action:
+            - "dynamodb:PutItem"
+            - "dynamodb:BatchWriteItem"
+          Resource:
+            Fn::GetAtt: [ DynamoDBLocationTable, Arn ]
+
+package:
+  patterns:
+    - '!./**'
+    - ./bin/**
+
+functions:
+  receiver:
+    handler: bin/receiver
+    environment:
+      SQS_LOCATION_URL:
+        Ref: SQSLocation
+    events:
+      - httpApi:
+          path: /
+          method: post
+
+  writer:
+    handler: bin/writer
+    environment:
+      DB_LOCATION_NAME: ${self:service}-location-${sls:stage}
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [ SQSLocation, Arn ]
+
+resources:
+  Resources:
+    DynamoDBLocationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-location-${sls:stage}
+        AttributeDefinitions:
+          - AttributeName: tid
+            AttributeType: S
+          - AttributeName: tst
+            AttributeType: N
+        KeySchema:
+          - AttributeName: tid
+            KeyType: HASH
+          - AttributeName: tst
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    SQSLocation:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:service}-location-${sls:stage}
+        MessageRetentionPeriod: 604800
+        VisibilityTimeout: 60
+        DelaySeconds: 30
