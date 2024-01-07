@@ -3,6 +3,7 @@
 
 # golang output binary directory
 bin
+build/
 
 # Binaries for programs and plugins
 *.exe

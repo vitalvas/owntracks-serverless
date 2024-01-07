@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -61,10 +62,20 @@ func (h *Handler) Handler(ctx context.Context, request events.APIGatewayV2HTTPRe
 			}, nil
 		}
 
+	// dummy response for iphone
+	case "request":
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusOK,
+			Body:       "[]",
+			Headers: map[string]string{
+				"Content-Type": "application/json",
+			},
+		}, nil
+
 	default:
 		return events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusNotImplemented,
-			Body:       http.StatusText(http.StatusNotImplemented),
+			Body:       fmt.Sprintf("not implemented: %s", data.Type),
 		}, nil
 	}
 

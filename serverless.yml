@@ -3,9 +3,12 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: go1.x
-  stage: prod
-  region: eu-central-1
+  runtime: provided.al2
+  architecture: arm64
+  memorySize: 256
+  stage: ${opt:stage, 'prod'}
+  region: ${opt:region, 'eu-central-1'}
+  logRetentionInDays: 7
 
   iam:
     role:
@@ -24,13 +27,13 @@ provider:
             Fn::GetAtt: [ DynamoDBLocationTable, Arn ]
 
 package:
-  patterns:
-    - '!./**'
-    - ./bin/**
+  individually: true
 
 functions:
   receiver:
-    handler: bin/receiver
+    handler: bootstrap
+    package:
+      artifact: build/receiver.zip
     environment:
       SQS_LOCATION_URL:
         Ref: SQSLocation
@@ -38,9 +41,14 @@ functions:
       - httpApi:
           path: /
           method: post
+      - httpApi:
+          path: /report
+          method: post
 
   writer:
-    handler: bin/writer
+    handler: bootstrap
+    package:
+      artifact: build/writer.zip
     environment:
       DB_LOCATION_NAME: ${self:service}-location-${sls:stage}
     events:
