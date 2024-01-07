@@ -78,7 +78,7 @@ func (h *Handler) Handler(ctx context.Context, request events.APIGatewayV2HTTPRe
 }
 
 func (h *Handler) handleLocation(ctx context.Context, request events.APIGatewayV2HTTPRequest, body string) error {
-	var data message.MessageLocation
+	var data message.Location
 
 	if err := json.Unmarshal([]byte(body), &data); err != nil {
 		return err

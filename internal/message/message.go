@@ -1,6 +1,6 @@
 package message
 
-type MessageLocation struct {
+type Location struct {
 	Acc       int64    `json:"acc,omitempty" dynamodbav:"acc,omitempty"`
 	Alt       int64    `json:"alt,omitempty" dynamodbav:"alt,omitempty"`
 	Batt      int64    `json:"batt,omitempty" dynamodbav:"batt,omitempty"`

@@ -28,7 +28,7 @@ func (h *Handler) Handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 	items := make([]types.WriteRequest, len(sqsEvent.Records))
 
 	for idx, msg := range sqsEvent.Records {
-		var data message.MessageLocation
+		var data message.Location
 
 		if err := json.Unmarshal([]byte(msg.Body), &data); err != nil {
 			return err
