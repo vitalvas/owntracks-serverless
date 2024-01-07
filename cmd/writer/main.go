@@ -60,6 +60,8 @@ func (h *Handler) Handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 }
 
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
 	sdkConfig, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)

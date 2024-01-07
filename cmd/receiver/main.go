@@ -63,7 +63,7 @@ func (h *Handler) Handler(ctx context.Context, request events.APIGatewayV2HTTPRe
 		}
 
 	// dummy response for iphone
-	case "request":
+	case "request", "dump", "waypoints":
 		return events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusOK,
 			Body:       "[]",
@@ -73,6 +73,8 @@ func (h *Handler) Handler(ctx context.Context, request events.APIGatewayV2HTTPRe
 		}, nil
 
 	default:
+		log.Println("not implemented:", data.Type)
+
 		return events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusNotImplemented,
 			Body:       fmt.Sprintf("not implemented: %s", data.Type),
@@ -145,6 +147,8 @@ func (h *Handler) handleLocation(ctx context.Context, request events.APIGatewayV
 }
 
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
 	sdkConfig, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)

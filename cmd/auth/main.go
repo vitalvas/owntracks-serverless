@@ -107,6 +107,8 @@ func (h *Handler) HandleRequest(ctx context.Context, request events.APIGatewayV2
 }
 
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
 	sdkConfig, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
