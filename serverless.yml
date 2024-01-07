@@ -10,6 +10,22 @@ provider:
   region: ${opt:region, 'eu-central-1'}
   logRetentionInDays: 7
 
+  logs:
+    httpApi: true
+  
+  apiGateway:
+    metrics: true
+
+  httpApi:
+    authorizers:
+      agentAuthorizer:
+        type: request
+        identitySource:
+          - $request.header.Authorization
+        enableSimpleResponses: true
+        resultTtlInSeconds: 0
+        functionArn: arn:aws:lambda:${self:provider.region}:966137286427:function:${self:service}-${self:provider.stage}-auth
+
   iam:
     role:
       statements:
@@ -25,11 +41,22 @@ provider:
             - "dynamodb:BatchWriteItem"
           Resource:
             Fn::GetAtt: [ DynamoDBLocationTable, Arn ]
+        - Effect: "Allow"
+          Action:
+            - "secretsmanager:GetSecretValue"
+          Resource: "arn:aws:secretsmanager:eu-central-1:966137286427:secret:owntracks/prod/*"
 
 package:
   individually: true
 
 functions:
+  auth:
+    handler: bootstrap
+    package:
+      artifact: build/auth.zip
+    environment:
+      SECRET_ID: owntracks/prod/auth
+
   receiver:
     handler: bootstrap
     package:
@@ -42,8 +69,10 @@ functions:
           path: /
           method: post
       - httpApi:
-          path: /report
+          path: /owntracks/report
           method: post
+          authorizer:
+            name: agentAuthorizer
 
   writer:
     handler: bootstrap

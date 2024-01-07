@@ -145,16 +145,16 @@ func (h *Handler) handleLocation(ctx context.Context, request events.APIGatewayV
 }
 
 func main() {
-	h := Handler{
-		locationQueue: os.Getenv("SQS_LOCATION_URL"),
-	}
-
 	sdkConfig, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	h.sqs = sqs.NewFromConfig(sdkConfig)
+	h := Handler{
+		locationQueue: os.Getenv("SQS_LOCATION_URL"),
+
+		sqs: sqs.NewFromConfig(sdkConfig),
+	}
 
 	lambda.Start(h.Handler)
 }
