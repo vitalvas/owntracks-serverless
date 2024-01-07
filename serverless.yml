@@ -110,5 +110,5 @@ resources:
       Properties:
         QueueName: ${self:service}-location-${sls:stage}
         MessageRetentionPeriod: 604800
-        VisibilityTimeout: 60
-        DelaySeconds: 30
+        VisibilityTimeout: 300
+        DelaySeconds: 10
